@@ -25,18 +25,26 @@ class GenericAlgorithmHelper(object):
             winners.append(pair[0] if pair[0].fitness < pair[1].fitness else pair[1])
         return winners
 
-    def mutate(self, population, probability):
-        for individual in population:
-            self.mutateIndividual(individual)
+    def mapValue(self, value, range):
+        return int(math.floor((value - 0) / (1 - 0) * (range[1] - range[0]) + range[0]))
 
-    def mutateIndividual(self, individual):
+    def mutate(self, population, pm):
+        for individual in population:
+            self.mutateIndividual(individual, pm)
+
+    def mutateIndividual(self, individual, pm):
         for i in range(0, 9):
             valuesRow, isFixedRow = individual.getDigitsRow(i)
             notFixedIndexes = [i for i, val in enumerate(isFixedRow) if not val]
             if len(notFixedIndexes) > 1:
-                swapIndexes = random.sample(notFixedIndexes, 2)
-                individual.setValue(i, swapIndexes[0], valuesRow[swapIndexes[1]])
-                individual.setValue(i, swapIndexes[1], valuesRow[swapIndexes[0]])
+                for j in range(0, len(notFixedIndexes) - 1):
+                    if pm > random.random():
+                        rand = random.random()
+                        index = self.mapValue(rand, (j + 1, len(notFixedIndexes)))
+                        swapIndexes = [notFixedIndexes[j], notFixedIndexes[index]]
+                        # swapIndexes = random.sample(notFixedIndexes, 2)
+                        individual.setValue(i, swapIndexes[0], valuesRow[swapIndexes[1]])
+                        individual.setValue(i, swapIndexes[1], valuesRow[swapIndexes[0]])
         individual.calculateFitness()
 
     def crossover(self, population):
@@ -48,7 +56,7 @@ class GenericAlgorithmHelper(object):
 
     def replace(self, parents, offspring, replacementFraction):
         parents.sort(key=lambda x: x.fitness)
-        offspring.sort(key=lambda x: x.fitness)
+        # offspring.sort(key=lambda x: x.fitness)
         individualsToReplace = math.floor(len(parents) * replacementFraction)
         return parents[0: len(parents) - individualsToReplace] + offspring[0: individualsToReplace]
 
