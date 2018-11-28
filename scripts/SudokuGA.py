@@ -21,20 +21,22 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
         self.fitness = error
         return self.fitness
 
-    def doublePointCrossover(self, other):
-        firstChildDigits = []
-        secondChildDigits = []
-        for i in range(0, self.SEGMENT_LENGTH):
-            listOffspring = self.listDoublePointCrossover(self.getDigitsRow(i)[0], other.getDigitsRow(i)[0], i)
-            firstChildDigits += listOffspring[0]
-            secondChildDigits += listOffspring[1]
+    def doublePointCrossover(self, other, bounds, pc):
+        firstChildDigits = self.sudokuDigitsArray[:]
+        secondChildDigits = other.sudokuDigitsArray[:]
+        if pc > random.random():
+            for i in range(0, self.SEGMENT_LENGTH):
+                listOffspring = self.listDoublePointCrossover(self.getDigitsRow(i)[0], other.getDigitsRow(i)[0], i,
+                                                              bounds)
+                firstChildDigits += listOffspring[0]
+                secondChildDigits += listOffspring[1]
         return SudokuGA(firstChildDigits), SudokuGA(secondChildDigits)
 
-    def listDoublePointCrossover(self, mom, dad, rowNumber):
+    def listDoublePointCrossover(self, mom, dad, rowNumber, bounds):
         if len(mom) != len(dad):
             raise Exception
-        leftBound = random.randint(1, int(len(mom) / 2))
-        rightBound = random.randint(leftBound + 1, len(mom) - 1)
+        leftBound = bounds[0] if bounds[0] > 0 else 1
+        rightBound = bounds[1]
         firstChild = self.getRowWithFixedValues(mom, rowNumber)
         secondChild = self.getRowWithFixedValues(mom, rowNumber)
         firstChild[leftBound: rightBound] = mom[leftBound:rightBound]

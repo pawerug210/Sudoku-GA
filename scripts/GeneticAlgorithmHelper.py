@@ -41,17 +41,19 @@ class GenericAlgorithmHelper(object):
                     if pm > random.random():
                         rand = random.random()
                         index = self.mapValue(rand, (j + 1, len(notFixedIndexes)))
+                       # print(len(notFixedIndexes) - 1, index)
                         swapIndexes = [notFixedIndexes[j], notFixedIndexes[index]]
                         # swapIndexes = random.sample(notFixedIndexes, 2)
                         individual.setValue(i, swapIndexes[0], valuesRow[swapIndexes[1]])
                         individual.setValue(i, swapIndexes[1], valuesRow[swapIndexes[0]])
         individual.calculateFitness()
 
-    def crossover(self, population):
+    def crossover(self, population, pc):
         offsprings = []
         for i in range(0, len(population), 2):
             mom, dad = population[i: i + 2]
-            offsprings += dad.doublePointCrossover(mom)
+            bounds = self.getTwoBounds(mom.SEGMENT_LENGTH)
+            offsprings += dad.doublePointCrossover(mom, bounds, pc)
         return offsprings
 
     def replace(self, parents, offspring, replacementFraction):
@@ -67,3 +69,9 @@ class GenericAlgorithmHelper(object):
     def getRowWithFixedValues(self, values, mask):
         rowWithFixedValues = map(lambda value, isFixed: value if isFixed else 0, values, mask)
         return list(rowWithFixedValues)
+
+    def getTwoBounds(self, size):
+        firstBound = random.randint(1, size - 1)
+        secondBound = (firstBound + int(size / 3)) % (size - 1)
+        bounds = sorted([firstBound, secondBound])
+        return bounds
