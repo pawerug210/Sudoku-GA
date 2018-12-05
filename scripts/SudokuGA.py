@@ -7,19 +7,35 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
 
     def __init__(self, sudoku):
         super(SudokuGA, self).__init__(sudoku)
-        self.fitness = self.calculateFitness()
+        self.fitness, self.problemMakersMap = self.update()
 
     def getError(self, chromosome):
         return len(self.NUMBERS) - len(set(chromosome))
 
-    def calculateFitness(self):
+    def update(self):
         error = 0
+        problemIndexes = [False] * len(self.sudokuDigitsArray)
         for i in range(0, 9):
-            error += self.getError(self.getRow(self.sudokuDigitsArray, i)) + \
-                     self.getError(self.getColumn(self.sudokuDigitsArray, i)) + \
-                     self.getError(self.getSquare(self.sudokuDigitsArray, i))
+            row = self.getRow(self.sudokuDigitsArray, i)
+            column = self.getColumn(self.sudokuDigitsArray, i)
+            square = self.getSquare(self.sudokuDigitsArray, i)
+            rowError = self.getError(row)
+            columnError = self.getError(column)
+            squareError = self.getError(square)
+            if rowError != 0:
+                raise Exception
+            error += rowError + columnError + squareError
+            if columnError != 0:
+                duplicationIndexes = self.getDuplicationIndexes(column)
+                for idx in duplicationIndexes:
+                    problemIndexes[idx * self.SEGMENT_LENGTH + i] = True
+            # if squareError != 0:
+            #     duplicationIndexes = self.getDuplicationIndexes(square)
+            #     for idx in duplicationIndexes:
+            #         problemIndexes[] = True
         self.fitness = error
-        return self.fitness
+        self.problemMakersMap = problemIndexes
+        return self.fitness, problemIndexes
 
     def doublePointCrossover(self, other):
         firstChildDigits = []
@@ -42,3 +58,11 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
         firstChild = self.fillZeros(firstChild, dad)
         secondChild = self.fillZeros(secondChild, mom)
         return firstChild, secondChild
+
+    def getDuplicationIndexes(self, valuesList):
+        duplicates = [val for val in valuesList if valuesList.count(val) > 1]
+        return [idx for idx, val in enumerate(valuesList) if val in duplicates]
+
+    def getProblemIndexes(self, row):
+        startPosition = row * self.SEGMENT_LENGTH
+        return self.problemMakersMap[startPosition: startPosition + self.SEGMENT_LENGTH]
