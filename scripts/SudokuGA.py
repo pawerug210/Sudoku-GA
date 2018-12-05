@@ -29,10 +29,10 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
                 duplicationIndexes = self.getDuplicationIndexes(column)
                 for idx in duplicationIndexes:
                     problemIndexes[idx * self.SEGMENT_LENGTH + i] = True
-            # if squareError != 0:
-            #     duplicationIndexes = self.getDuplicationIndexes(square)
-            #     for idx in duplicationIndexes:
-            #         problemIndexes[] = True
+            if squareError != 0:
+                duplicationIndexes = self.getDuplicationIndexes(square)
+                for idx in duplicationIndexes:
+                    problemIndexes[self.getAbsoluteIndex(i, idx)] = True
         self.fitness = error
         self.problemMakersMap = problemIndexes
         return self.fitness, problemIndexes
@@ -45,6 +45,21 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
             firstChildDigits += listOffspring[0]
             secondChildDigits += listOffspring[1]
         return SudokuGA(firstChildDigits), SudokuGA(secondChildDigits)
+
+    def getAbsoluteIndex(self, squareNumber, relativeIndex):
+        startPosition1 = squareNumber * self.SQUARE_SEGMENT_SIZE
+        if squareNumber > 2:
+            startPosition1 += 2 * self.SEGMENT_LENGTH
+        if squareNumber > 5:
+            startPosition1 += 2 * self.SEGMENT_LENGTH
+        startPosition2 = startPosition1 + self.SEGMENT_LENGTH
+        startPosition3 = startPosition2 + self.SEGMENT_LENGTH
+        index = relativeIndex % self.SQUARE_SEGMENT_SIZE
+        if relativeIndex > 5:
+            return startPosition3 + index
+        if relativeIndex > 2:
+            return startPosition2 + index
+        return startPosition1 + index
 
     def listDoublePointCrossover(self, mom, dad, rowNumber):
         if len(mom) != len(dad):

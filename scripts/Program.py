@@ -3,10 +3,10 @@ import SudokuGA
 import GeneticAlgorithmHelper as helper
 import sys
 
-rf = 0.8
+rf = 0.9
 
 helper = helper.GenericAlgorithmHelper()
-populationSize = 24
+populationSize = 12
 data = readFile('test_1').flatten().tolist()
 SudokuGA.SudokuGA.sudokuFixedDigitsArray = [x > 0 for x in data]
 population = [SudokuGA.SudokuGA(data) for i in range(0, populationSize)]
@@ -29,8 +29,8 @@ while not solved:
         resetCounter += 1
     if best == 0:
         solved = True
-    rf = 0.8
-    if resetCounter >= 2000:
+    rf = 0.9
+    if resetCounter >= 1500:
         best = sys.maxsize
         resetCounter = 0
         rf = 1.0
