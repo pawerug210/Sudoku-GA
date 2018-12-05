@@ -1,9 +1,11 @@
 from common import readFile
 import SudokuGA
 import GeneticAlgorithmHelper as helper
+import sys
 
+rf = 0.9
 
-populationSize = 50
+populationSize = 24
 pm = 0.1
 pc = 0.2
 rf = 0.7  # replacement fraction
@@ -15,12 +17,27 @@ SudokuGA.SudokuGA.sudokuFixedDigitsArray = [x > 0 for x in data]
 population = [SudokuGA.SudokuGA(data) for i in range(0, populationSize)]
 solved = False
 generation = 0
+resetCounter = 0
+best = sys.maxsize
 while not solved:
     generation += 1
     offspring = helper.select(population)
     offspring = helper.crossover(offspring, pc)
     helper.mutate(offspring, pm)
     population = helper.replace(population, offspring, rf)
-    print(population)
-    if population[0].fitness < 2:
-        population[0].draw()
+    print(generation, population)
+    currentBest = population[0].fitness
+    if currentBest < best:
+        best = currentBest
+        resetCounter = 0
+    else:
+        resetCounter += 1
+    if best == 0:
+        solved = True
+    rf = 0.9
+    if resetCounter >= 1500:
+        best = sys.maxsize
+        resetCounter = 0
+        rf = 1.0
+
+population[0].draw()

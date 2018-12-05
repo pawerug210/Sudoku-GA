@@ -4,6 +4,8 @@ import math
 
 class GenericAlgorithmHelper(object):
 
+    AdaptiveMutationFactor = 0.3
+
     def select(self, population):
         pairs = self.pair(population)
         return self.tournament(pairs)
@@ -35,18 +37,20 @@ class GenericAlgorithmHelper(object):
     def mutateIndividual(self, individual, pm):
         for i in range(0, 9):
             valuesRow, isFixedRow = individual.getDigitsRow(i)
+            problemIndexes = individual.getProblemIndexes(i)
             notFixedIndexes = [i for i, val in enumerate(isFixedRow) if not val]
             if len(notFixedIndexes) > 1:
                 for j in range(0, len(notFixedIndexes) - 1):
-                    if pm > random.random():
+                    if pm + (self.AdaptiveMutationFactor if problemIndexes[notFixedIndexes[j]] else 0) > random.random():
                         rand = random.random()
                         index = self.mapValue(rand, (j + 1, len(notFixedIndexes)))
                        # print(len(notFixedIndexes) - 1, index)
                         swapIndexes = [notFixedIndexes[j], notFixedIndexes[index]]
                         # swapIndexes = random.sample(notFixedIndexes, 2)
-                        individual.setValue(i, swapIndexes[0], valuesRow[swapIndexes[1]])
-                        individual.setValue(i, swapIndexes[1], valuesRow[swapIndexes[0]])
-        individual.calculateFitness()
+                        valuesRow[swapIndexes[1]], valuesRow[swapIndexes[0]] = valuesRow[swapIndexes[0]], valuesRow[swapIndexes[1]]
+                        individual.setValue(i, swapIndexes[0], valuesRow[swapIndexes[0]])
+                        individual.setValue(i, swapIndexes[1], valuesRow[swapIndexes[1]])
+        individual.update()
 
     def crossover(self, population, pc):
         offsprings = []
