@@ -5,8 +5,13 @@ import random
 
 class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
 
+    Counter = 0
+
     def __init__(self, sudoku):
         super(SudokuGA, self).__init__(sudoku)
+        # todo counter is not working
+        self.Id = self.Counter
+        self.Counter += 1
         self.fitness, self.problemMakersMap = self.update()
 
     def getError(self, chromosome):
@@ -14,8 +19,9 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
 
     def update(self):
         error = 0
-        problemIndexes = [False] * len(self.sudokuDigitsArray)
+        problemIndexes = [0] * len(self.sudokuDigitsArray)
         for i in range(0, 9):
+            # todo remove row from validation
             row = self.getRow(self.sudokuDigitsArray, i)
             column = self.getColumn(self.sudokuDigitsArray, i)
             square = self.getSquare(self.sudokuDigitsArray, i)
@@ -24,15 +30,17 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
             squareError = self.getError(square)
             if rowError != 0:
                 raise Exception
-            error += rowError + columnError + squareError
+            error += columnError + squareError
             if columnError != 0:
                 duplicationIndexes = self.getDuplicationIndexes(column)
                 for idx in duplicationIndexes:
-                    problemIndexes[idx * self.SEGMENT_LENGTH + i] = True
+                    problemIndexes[idx * self.SEGMENT_LENGTH + i] += 1
             if squareError != 0:
                 duplicationIndexes = self.getDuplicationIndexes(square)
                 for idx in duplicationIndexes:
-                    problemIndexes[self.getAbsoluteIndex(i, idx)] = True
+                    problemIndexes[self.getAbsoluteIndex(i, idx)] += 1
+        if any(x > 2 for x in problemIndexes):
+            raise Exception
         self.fitness = error
         self.problemMakersMap = problemIndexes
         return self.fitness, problemIndexes

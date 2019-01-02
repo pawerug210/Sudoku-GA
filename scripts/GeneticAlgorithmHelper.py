@@ -5,26 +5,29 @@ import math
 class GenericAlgorithmHelper(object):
 
     AdaptiveMutationFactor = 0.3
+    CurrentBest = 100000  # bigger value than possible
+    LastChange = 0  # iteration when last time something changed
 
-    def select(self, population):
-        pairs = self.pair(population)
-        return self.tournament(pairs)
+    def select(self, population, tournamentSize):
+        groups = self.group(population, tournamentSize)
+        return self.tournament(groups)
 
-    def pair(self, population):
-        if len(population) % 2 != 0:
+    def group(self, population, groupSize):
+        if len(population) % groupSize != 0:
             raise Exception
         pop_copy = population[:]
-        # getting random pairs
-        random.shuffle(pop_copy)
-        pairs = [pop_copy[i*2: (i+1)*2] for i in range(int(len(pop_copy) / 2))]
-        random.shuffle(pop_copy)
-        pairs += [pop_copy[i*2: (i+1)*2] for i in range(int(len(pop_copy) / 2))]
-        return pairs
+        groups = []
+        for j in range(groupSize):
+            random.shuffle(pop_copy)
+            groups += [pop_copy[i * groupSize: (i + 1) * groupSize] for i in range(int(len(pop_copy) / groupSize))]
+        return groups
 
-    def tournament(self, pairs):
+    def tournament(self, groups):
         winners = []
-        for pair in pairs:
-            winners.append(pair[0] if pair[0].fitness < pair[1].fitness else pair[1])
+        for group in groups:
+            fitnesses = [x.fitness for x in group]
+            minFitnessIndex = fitnesses.index(min(fitnesses))
+            winners.append(group[minFitnessIndex])
         return winners
 
     def mapValue(self, value, range):
@@ -41,7 +44,7 @@ class GenericAlgorithmHelper(object):
             notFixedIndexes = [i for i, val in enumerate(isFixedRow) if not val]
             if len(notFixedIndexes) > 1:
                 for j in range(0, len(notFixedIndexes) - 1):
-                    if pm + (self.AdaptiveMutationFactor if problemIndexes[notFixedIndexes[j]] else 0) > random.random():
+                    if pm + self.AdaptiveMutationFactor * problemIndexes[notFixedIndexes[j]] > random.random():
                         rand = random.random()
                         index = self.mapValue(rand, (j + 1, len(notFixedIndexes)))
                        # print(len(notFixedIndexes) - 1, index)
@@ -79,3 +82,15 @@ class GenericAlgorithmHelper(object):
         secondBound = (firstBound + int(size / 3)) % (size - 1)
         bounds = sorted([firstBound, secondBound])
         return bounds
+
+    def shouldRestart(self, currentBest, iteration, restart):
+        if currentBest < self.CurrentBest:
+            self.CurrentBest = currentBest
+            self.LastChange = iteration
+            return False
+        if iteration - self.LastChange >= restart:
+            self.LastChange = iteration
+            self.CurrentBest = 1000000
+            return True
+        return False
+
