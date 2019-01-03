@@ -4,7 +4,7 @@ import math
 
 class GenericAlgorithmHelper(object):
 
-    AdaptiveMutationFactor = 0.3
+    AdaptiveMutationFactor = 0.1
     CurrentBest = 100000  # bigger value than possible
     LastChange = 0  # iteration when last time something changed
 
@@ -43,16 +43,22 @@ class GenericAlgorithmHelper(object):
             problemIndexes = individual.getProblemIndexes(i)
             notFixedIndexes = [i for i, val in enumerate(isFixedRow) if not val]
             if len(notFixedIndexes) > 1:
-                for j in range(0, len(notFixedIndexes) - 1):
+                for j in range(0, len(notFixedIndexes)):
                     if pm + self.AdaptiveMutationFactor * problemIndexes[notFixedIndexes[j]] > random.random():
                         rand = random.random()
-                        index = self.mapValue(rand, (j + 1, len(notFixedIndexes)))
-                       # print(len(notFixedIndexes) - 1, index)
-                        swapIndexes = [notFixedIndexes[j], notFixedIndexes[index]]
-                        # swapIndexes = random.sample(notFixedIndexes, 2)
-                        valuesRow[swapIndexes[1]], valuesRow[swapIndexes[0]] = valuesRow[swapIndexes[0]], valuesRow[swapIndexes[1]]
-                        individual.setValue(i, swapIndexes[0], valuesRow[swapIndexes[0]])
-                        individual.setValue(i, swapIndexes[1], valuesRow[swapIndexes[1]])
+                        index = self.mapValue(rand, (0, len(notFixedIndexes) - 1))
+                        # different value than j
+                        valueFromIndexDifferentThanJ = (notFixedIndexes[:j] + notFixedIndexes[j + 1:])[index]
+                        if notFixedIndexes[j] != valueFromIndexDifferentThanJ:
+                            swapIndexes = [notFixedIndexes[j], valueFromIndexDifferentThanJ]
+                            if swapIndexes[0] == swapIndexes[1]:
+                                raise Exception
+                            # swapIndexes = random.sample(notFixedIndexes, 2)
+                            valuesRow[swapIndexes[1]], valuesRow[swapIndexes[0]] = valuesRow[swapIndexes[0]], valuesRow[swapIndexes[1]]
+                            individual.setValue(i, swapIndexes[0], valuesRow[swapIndexes[0]])
+                            individual.setValue(i, swapIndexes[1], valuesRow[swapIndexes[1]])
+                        else:
+                            raise Exception
         individual.update()
 
     def crossover(self, population, pc):
