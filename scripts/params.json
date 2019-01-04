@@ -1,0 +1,8 @@
+{
+	"restartCriteria" : "500",
+	"populationSize" : "100",
+	"tournamentSize" : "4",
+	"pm" : "0.0",
+	"pc" : "0.0",
+	"rf" : "0.9"
+}

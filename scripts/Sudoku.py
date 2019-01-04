@@ -3,7 +3,6 @@ from random import shuffle
 
 
 class Sudoku(object):
-
     NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     SEGMENT_LENGTH = 9
     SQUARE_SEGMENT_SIZE = 3
@@ -19,7 +18,6 @@ class Sudoku(object):
         for i in range(0, 9):
             shuffle(valuesList)
             filledDigitsList += self.fillZeros(self.getRow(values=digitsList, rowNumber=i), valuesList)
-        # print(filledDigitsList)
         return filledDigitsList
 
     def isValid(self):
@@ -32,19 +30,10 @@ class Sudoku(object):
 
         return error == 0
 
-
-    def getRow(self, values, rowNumber):
-        startPosition = rowNumber * self.SEGMENT_LENGTH
-        return values[startPosition: startPosition + self.SEGMENT_LENGTH]
-
     def getDigitsRow(self, rowNumber):
         startPosition = rowNumber * self.SEGMENT_LENGTH
         return self.sudokuDigitsArray[startPosition: startPosition + self.SEGMENT_LENGTH], \
                self.sudokuFixedDigitsArray[startPosition: startPosition + self.SEGMENT_LENGTH]
-
-    def getColumn(self, values, columnNumber):
-        jumpSize = self.SEGMENT_LENGTH
-        return values[columnNumber::jumpSize]
 
     def setValue(self, row, column, value):
         index = self.getIndex(row, column)
@@ -61,6 +50,14 @@ class Sudoku(object):
     def getIndex(self, row, column):
         return row * self.SEGMENT_LENGTH + column
 
+    def getRow(self, values, rowNumber):
+        startPosition = rowNumber * self.SEGMENT_LENGTH
+        return values[startPosition: startPosition + self.SEGMENT_LENGTH]
+
+    def getColumn(self, values, columnNumber):
+        jumpSize = self.SEGMENT_LENGTH
+        return values[columnNumber::jumpSize]
+
     # 0 | 1 | 2
     # ---------
     # 3 | 4 | 5
@@ -74,17 +71,17 @@ class Sudoku(object):
             startPosition1 += 2 * self.SEGMENT_LENGTH
         startPosition2 = startPosition1 + self.SEGMENT_LENGTH
         startPosition3 = startPosition2 + self.SEGMENT_LENGTH
-        retVal = values[startPosition1: startPosition1 + self.SQUARE_SEGMENT_SIZE] + \
-                 values[startPosition2: startPosition2 + self.SQUARE_SEGMENT_SIZE] + \
-                 values[startPosition3: startPosition3 + self.SQUARE_SEGMENT_SIZE]
-        # print(sorted(retVal))
-        return retVal
+        squareValues = values[startPosition1: startPosition1 + self.SQUARE_SEGMENT_SIZE] + \
+                       values[startPosition2: startPosition2 + self.SQUARE_SEGMENT_SIZE] + \
+                       values[startPosition3: startPosition3 + self.SQUARE_SEGMENT_SIZE]
+        return squareValues
 
     def listError(self, values):
         return len(self.NUMBERS) - len(set(values))
 
     def getRowWithFixedValues(self, values, rowNumber):
-        rowWithFixedValues = map(lambda value, isFixed: value if isFixed else 0, values, self.getRow(self.sudokuFixedDigitsArray, rowNumber))
+        rowWithFixedValues = map(lambda value, isFixed: value if isFixed else 0, values,
+                                 self.getRow(self.sudokuFixedDigitsArray, rowNumber))
         return list(rowWithFixedValues)
 
     def zeros(self, n):
@@ -102,7 +99,3 @@ class Sudoku(object):
 
     def draw(self):
         print(np.asarray(self.sudokuDigitsArray).reshape((9, 9)))
-
-
-
-

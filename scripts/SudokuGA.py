@@ -5,13 +5,8 @@ import random
 
 class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
 
-    Counter = 0
-
     def __init__(self, sudoku):
         super(SudokuGA, self).__init__(sudoku)
-        # todo counter is not working
-        self.Id = self.Counter
-        self.Counter += 1
         self.fitness, self.problemMakersMap = self.update()
 
     def getError(self, chromosome):
@@ -32,15 +27,16 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
                 raise Exception
             error += columnError + squareError
             if columnError != 0:
-                duplicationIndexes = self.getDuplicationIndexes(column)
-                for idx in duplicationIndexes:
-                    problemIndexes[idx * self.SEGMENT_LENGTH + i] += 1
+                # todo rename duplicationindexes
+                duplicationIndexes = self.getDuplicationIndexes(column, self.getColumn(self.sudokuFixedDigitsArray, i))
+                for item in duplicationIndexes:
+                    globalIndex = item[0] * self.SEGMENT_LENGTH + i
+                    problemIndexes[globalIndex] += 10 if item[1] else 1
             if squareError != 0:
-                duplicationIndexes = self.getDuplicationIndexes(square)
-                for idx in duplicationIndexes:
-                    problemIndexes[self.getAbsoluteIndex(i, idx)] += 1
-        if any(x > 2 for x in problemIndexes):
-            raise Exception
+                duplicationIndexes = self.getDuplicationIndexes(square, self.getSquare(self.sudokuFixedDigitsArray, i))
+                for item in duplicationIndexes:
+                    globalIndex = self.getAbsoluteIndex(i, item[0])
+                    problemIndexes[globalIndex] += 10 if item[1] else 1
         self.fitness = error
         self.problemMakersMap = problemIndexes
         return self.fitness, problemIndexes
@@ -50,7 +46,7 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
         secondChildDigits = other.sudokuDigitsArray[:]
         if pc > random.random():
             for i in range(0, self.SEGMENT_LENGTH):
-                listOffspring = self.listDoublePointCrossover(self.getDigitsRow(i)[0], other.getDigitsRow(i)[0], i,
+                listOffspring = self.rowDoublePointCrossover(self.getDigitsRow(i)[0], other.getDigitsRow(i)[0], i,
                                                               bounds)
                 firstChildDigits += listOffspring[0]
                 secondChildDigits += listOffspring[1]
@@ -72,22 +68,24 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
             return startPosition2 + index
         return startPosition1 + index
 
-    def listDoublePointCrossover(self, mom, dad, rowNumber, bounds):
-        if len(mom) != len(dad):
-            raise Exception
+    def rowDoublePointCrossover(self, momRow, dadRow, rowNumber, bounds):
+        if len(momRow) != len(dadRow):
+            raise ValueError('Chromosomes are not the same size')
         leftBound = bounds[0] if bounds[0] > 0 else 1
         rightBound = bounds[1]
-        firstChild = self.getRowWithFixedValues(mom, rowNumber)
-        secondChild = self.getRowWithFixedValues(mom, rowNumber)
-        firstChild[leftBound: rightBound] = mom[leftBound:rightBound]
-        secondChild[leftBound: rightBound] = dad[leftBound:rightBound]
-        firstChild = self.fillZeros(firstChild, dad)
-        secondChild = self.fillZeros(secondChild, mom)
+        firstChild = self.getRowWithFixedValues(momRow, rowNumber)
+        secondChild = self.getRowWithFixedValues(momRow, rowNumber)
+        firstChild[leftBound: rightBound] = momRow[leftBound:rightBound]
+        secondChild[leftBound: rightBound] = dadRow[leftBound:rightBound]
+        firstChild = self.fillZeros(firstChild, dadRow)
+        secondChild = self.fillZeros(secondChild, momRow)
         return firstChild, secondChild
 
-    def getDuplicationIndexes(self, valuesList):
+    # todo rename it
+    def getDuplicationIndexes(self, valuesList, fixedValuesMask):
+        fixedValues = [val for idx, val in enumerate(valuesList) if fixedValuesMask[idx]]
         duplicates = [val for val in valuesList if valuesList.count(val) > 1]
-        return [idx for idx, val in enumerate(valuesList) if val in duplicates]
+        return [(idx, val in fixedValues) for idx, val in enumerate(valuesList) if val in duplicates]
 
     def getProblemIndexes(self, row):
         startPosition = row * self.SEGMENT_LENGTH

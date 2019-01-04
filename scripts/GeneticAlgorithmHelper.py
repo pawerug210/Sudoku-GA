@@ -4,7 +4,7 @@ import math
 
 class GenericAlgorithmHelper(object):
 
-    AdaptiveMutationFactor = 0.1
+    AdaptiveMutationFactor = 0.3
     CurrentBest = 100000  # bigger value than possible
     LastChange = 0  # iteration when last time something changed
 
@@ -14,7 +14,7 @@ class GenericAlgorithmHelper(object):
 
     def group(self, population, groupSize):
         if len(population) % groupSize != 0:
-            raise Exception
+            raise ValueError('Population size is not divisible by tournament size')
         pop_copy = population[:]
         groups = []
         for j in range(groupSize):
@@ -71,9 +71,8 @@ class GenericAlgorithmHelper(object):
 
     def replace(self, parents, offspring, replacementFraction):
         parents.sort(key=lambda x: x.fitness)
-        # offspring.sort(key=lambda x: x.fitness)
-        individualsToReplace = math.floor(len(parents) * replacementFraction)
-        return parents[0: len(parents) - individualsToReplace] + offspring[0: individualsToReplace]
+        individualsNumberToReplace = math.floor(len(parents) * replacementFraction)
+        return parents[0: len(parents) - individualsNumberToReplace] + offspring[0: individualsNumberToReplace]
 
 
     def getError(self, chromosome):
@@ -99,4 +98,3 @@ class GenericAlgorithmHelper(object):
             self.CurrentBest = 1000000
             return True
         return False
-
