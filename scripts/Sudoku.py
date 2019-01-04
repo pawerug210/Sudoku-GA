@@ -20,11 +20,6 @@ class Sudoku(object):
             filledDigitsList += self.fillZeros(self.getRow(values=digitsList, rowNumber=i), valuesList)
         return filledDigitsList
 
-    def getDigitsRow(self, rowNumber):
-        startPosition = rowNumber * self.SEGMENT_LENGTH
-        return self.DigitsArray[startPosition: startPosition + self.SEGMENT_LENGTH], \
-               self.FIXED_DIGITS_MAP[startPosition: startPosition + self.SEGMENT_LENGTH]
-
     def setValue(self, row, column, value):
         index = self.getIndex(row, column)
         if (value not in self.NUMBERS) or self.FIXED_DIGITS_MAP[index]:
@@ -40,11 +35,13 @@ class Sudoku(object):
     def getIndex(self, row, column):
         return row * self.SEGMENT_LENGTH + column
 
-    def getRow(self, values, rowNumber):
+    def getRow(self, rowNumber, values=None):
+        values = self.getValues(values)
         startPosition = rowNumber * self.SEGMENT_LENGTH
         return values[startPosition: startPosition + self.SEGMENT_LENGTH]
 
-    def getColumn(self, values, columnNumber):
+    def getColumn(self, columnNumber, values=None):
+        values = self.getValues(values)
         jumpSize = self.SEGMENT_LENGTH
         return values[columnNumber::jumpSize]
 
@@ -53,7 +50,8 @@ class Sudoku(object):
     # 3 | 4 | 5
     # ---------
     # 6 | 7 | 8
-    def getSquare(self, values, squareNumber):
+    def getSquare(self, squareNumber, values=None):
+        values = self.getValues(values)
         startPosition1 = squareNumber * self.SQUARE_SEGMENT_SIZE
         if squareNumber > 2:
             startPosition1 += 2 * self.SEGMENT_LENGTH
@@ -66,12 +64,17 @@ class Sudoku(object):
                        values[startPosition3: startPosition3 + self.SQUARE_SEGMENT_SIZE]
         return squareValues
 
+    def getValues(self, values):
+        if values is None:
+            return self.DigitsArray
+        return values
+
     def listError(self, values):
         return len(self.NUMBERS) - len(set(values))
 
     def getRowWithFixedValues(self, values, rowNumber):
         rowWithFixedValues = map(lambda value, isFixed: value if isFixed else 0, values,
-                                 self.getRow(self.FIXED_DIGITS_MAP, rowNumber))
+                                 self.getRow(rowNumber, self.FIXED_DIGITS_MAP))
         return list(rowWithFixedValues)
 
     def fillZeros(self, child, parent):

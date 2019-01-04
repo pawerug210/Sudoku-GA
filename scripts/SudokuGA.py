@@ -21,9 +21,9 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
         error = 0
         for i in range(0, 9):
             # todo remove row from validation
-            row = self.getRow(self.DigitsArray, i)
-            column = self.getColumn(self.DigitsArray, i)
-            square = self.getSquare(self.DigitsArray, i)
+            row = self.getRow(i)
+            column = self.getColumn(i)
+            square = self.getSquare(i)
             rowError = self.getError(row)
             columnError = self.getError(column)
             squareError = self.getError(square)
@@ -45,9 +45,9 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
     # Chromosome interface end
 
     def mutateRow(self, rowNumber, pm):
-        valuesRow = self.getRow(self.DigitsArray, rowNumber)
-        adaptiveMutationRow = self.getRow(self.AdaptiveMutationMap, rowNumber)
-        notFixedIndexes = [i for i, val in enumerate(self.getRow(self.FIXED_DIGITS_MAP, rowNumber)) if not val]
+        valuesRow = self.getRow(rowNumber)
+        adaptiveMutationRow = self.getRow(rowNumber, self.AdaptiveMutationMap)
+        notFixedIndexes = [i for i, val in enumerate(self.getRow(rowNumber, self.FIXED_DIGITS_MAP)) if not val]
         if len(notFixedIndexes) > 1:
             for j in range(0, len(notFixedIndexes)):
                 if pm + adaptiveMutationRow[notFixedIndexes[j]] > random.random():
@@ -72,16 +72,16 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
     def updateAdaptiveMutation(self):
         self.AdaptiveMutationMap = [0.0] * len(self.DigitsArray)
         for i in range(0, 9):
-            column = self.getColumn(self.DigitsArray, i)
-            square = self.getSquare(self.DigitsArray, i)
+            column = self.getColumn(i)
+            square = self.getSquare(i)
             if self.getError(column) != 0:
                 # todo rename duplicationindexes
-                duplicationIndexes = self.getDuplicationIndexesInfo(column, self.getColumn(self.FIXED_DIGITS_MAP, i))
+                duplicationIndexes = self.getDuplicationIndexesInfo(column, self.getColumn(i, self.FIXED_DIGITS_MAP))
                 for item in duplicationIndexes:
                     globalIndex = item[0] * self.SEGMENT_LENGTH + i
                     self.AdaptiveMutationMap[globalIndex] += 1.0 if item[1] else self.ADAPTIVE_MUTATION_VALUE
             if self.getError(square) != 0:
-                duplicationIndexes = self.getDuplicationIndexesInfo(square, self.getSquare(self.FIXED_DIGITS_MAP, i))
+                duplicationIndexes = self.getDuplicationIndexesInfo(square, self.getSquare(i, self.FIXED_DIGITS_MAP))
                 for item in duplicationIndexes:
                     globalIndex = self.getAbsoluteIndex(i, item[0])
                     self.AdaptiveMutationMap[globalIndex] += 1.0 if item[1] else self.ADAPTIVE_MUTATION_VALUE
@@ -91,7 +91,7 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
         secondChildDigits = other.DigitsArray[:]
         if pc > random.random():
             for i in range(0, self.SEGMENT_LENGTH):
-                listOffspring = self.rowDoublePointCrossover(self.getDigitsRow(i)[0], other.getDigitsRow(i)[0], i,
+                listOffspring = self.rowDoublePointCrossover(self.getRow(i), other.getRow(i), i,
                                                               bounds)
                 firstChildDigits += listOffspring[0]
                 secondChildDigits += listOffspring[1]
