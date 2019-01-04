@@ -3,11 +3,12 @@ import abc
 
 class Chromosome(object):
 
-    fitness = None
+    def __init__(self):
+        self.fitness = None
 
     @abc.abstractclassmethod
     def getFitness(self):
-        pass
+        return self.fitness
 
     @abc.abstractclassmethod
     def updateFitness(self):
@@ -18,7 +19,7 @@ class Chromosome(object):
         pass
 
     @abc.abstractclassmethod
-    def crossover(self, other, bounds, pc):
+    def crossover(self, other, pc):
         pass
 
     def __str__(self):

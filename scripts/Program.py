@@ -10,6 +10,7 @@ def solveSudoku(filename):
     params = getParams('params.json')
     data = readFile(filename).flatten().tolist()
     SudokuGA.SudokuGA.FIXED_DIGITS_MAP = [x > 0 for x in data]
+    SudokuGA.SudokuGA.ADAPTIVE_MUTATION_VALUE = float(params.adaptiveMutation)
     solved = False
     generation = 0
     while not solved:

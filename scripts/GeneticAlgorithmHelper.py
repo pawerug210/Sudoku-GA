@@ -29,12 +29,10 @@ class GenericAlgorithmHelper(object):
             winners.append(group[fitnesses.index(min(fitnesses))])
         return winners
 
-    def mapValue(self, value, range):
-        return int(math.floor((value - 0) / (1 - 0) * (range[1] - range[0]) + range[0]))
-
     def mutate(self, population, pm):
         for individual in population:
-            self.mutateIndividual(individual, pm)
+            individual.mutate(pm)
+            individual.updateFitness()
 
     def mutateIndividual(self, individual, pm):
         for i in range(0, 9):
@@ -64,28 +62,17 @@ class GenericAlgorithmHelper(object):
         offsprings = []
         for i in range(0, len(population), 2):
             mom, dad = population[i: i + 2]
-            bounds = self.getTwoBounds(mom.SEGMENT_LENGTH)
-            offsprings += dad.crossover(mom, bounds, pc)
+            offsprings += dad.crossover(mom, pc)
         return offsprings
 
     def replace(self, parents, offspring, replacementFraction):
         parents.sort(key=lambda x: x.fitness)
-        individualsNumberToReplace = math.floor(len(parents) * replacementFraction)
-        return parents[0: len(parents) - individualsNumberToReplace] + offspring[0: individualsNumberToReplace]
-
-
-    def getError(self, chromosome):
-        return len(self.NUMBERS) - len(set(chromosome))
+        quantityToReplace = math.floor(len(parents) * replacementFraction)
+        return parents[0: len(parents) - quantityToReplace] + offspring[0: quantityToReplace]
 
     def getRowWithFixedValues(self, values, mask):
         rowWithFixedValues = map(lambda value, isFixed: value if isFixed else 0, values, mask)
         return list(rowWithFixedValues)
-
-    def getTwoBounds(self, size):
-        firstBound = random.randint(1, size - 1)
-        secondBound = (firstBound + int(size / 3)) % (size - 1)
-        bounds = sorted([firstBound, secondBound])
-        return bounds
 
     def shouldRestart(self, currentBest, iteration, restart):
         if currentBest < self.CurrentBest:

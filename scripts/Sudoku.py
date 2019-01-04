@@ -3,6 +3,7 @@ from random import shuffle
 
 
 class Sudoku(object):
+
     NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     SEGMENT_LENGTH = 9
     SQUARE_SEGMENT_SIZE = 3
@@ -72,9 +73,6 @@ class Sudoku(object):
         rowWithFixedValues = map(lambda value, isFixed: value if isFixed else 0, values,
                                  self.getRow(self.FIXED_DIGITS_MAP, rowNumber))
         return list(rowWithFixedValues)
-
-    def zeros(self, n):
-        return [0] * n
 
     def fillZeros(self, child, parent):
         for value in parent:
