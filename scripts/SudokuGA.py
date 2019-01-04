@@ -9,17 +9,32 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
         super(SudokuGA, self).__init__(sudoku)
         self.fitness, self.problemMakersMap = self.update()
 
+
+    # chromosome interface
+
+    def getFitness(self):
+        pass
+
+    def updateFitness(self):
+        pass
+
+    def mutate(self, pm):
+        pass
+
+    def crossover(self, other, bounds, pc):
+        return self.doublePointCrossover(other, bounds, pc)
+
     def getError(self, chromosome):
         return len(self.NUMBERS) - len(set(chromosome))
 
     def update(self):
         error = 0
-        problemIndexes = [0] * len(self.sudokuDigitsArray)
+        problemIndexes = [0] * len(self.DigitsArray)
         for i in range(0, 9):
             # todo remove row from validation
-            row = self.getRow(self.sudokuDigitsArray, i)
-            column = self.getColumn(self.sudokuDigitsArray, i)
-            square = self.getSquare(self.sudokuDigitsArray, i)
+            row = self.getRow(self.DigitsArray, i)
+            column = self.getColumn(self.DigitsArray, i)
+            square = self.getSquare(self.DigitsArray, i)
             rowError = self.getError(row)
             columnError = self.getError(column)
             squareError = self.getError(square)
@@ -28,12 +43,12 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
             error += columnError + squareError
             if columnError != 0:
                 # todo rename duplicationindexes
-                duplicationIndexes = self.getDuplicationIndexes(column, self.getColumn(self.sudokuFixedDigitsArray, i))
+                duplicationIndexes = self.getDuplicationIndexes(column, self.getColumn(self.FIXED_DIGITS_MAP, i))
                 for item in duplicationIndexes:
                     globalIndex = item[0] * self.SEGMENT_LENGTH + i
                     problemIndexes[globalIndex] += 10 if item[1] else 1
             if squareError != 0:
-                duplicationIndexes = self.getDuplicationIndexes(square, self.getSquare(self.sudokuFixedDigitsArray, i))
+                duplicationIndexes = self.getDuplicationIndexes(square, self.getSquare(self.FIXED_DIGITS_MAP, i))
                 for item in duplicationIndexes:
                     globalIndex = self.getAbsoluteIndex(i, item[0])
                     problemIndexes[globalIndex] += 10 if item[1] else 1
@@ -42,8 +57,8 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
         return self.fitness, problemIndexes
 
     def doublePointCrossover(self, other, bounds, pc):
-        firstChildDigits = self.sudokuDigitsArray[:]
-        secondChildDigits = other.sudokuDigitsArray[:]
+        firstChildDigits = self.DigitsArray[:]
+        secondChildDigits = other.DigitsArray[:]
         if pc > random.random():
             for i in range(0, self.SEGMENT_LENGTH):
                 listOffspring = self.rowDoublePointCrossover(self.getDigitsRow(i)[0], other.getDigitsRow(i)[0], i,

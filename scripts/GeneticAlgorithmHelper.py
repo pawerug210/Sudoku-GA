@@ -26,8 +26,7 @@ class GenericAlgorithmHelper(object):
         winners = []
         for group in groups:
             fitnesses = [x.fitness for x in group]
-            minFitnessIndex = fitnesses.index(min(fitnesses))
-            winners.append(group[minFitnessIndex])
+            winners.append(group[fitnesses.index(min(fitnesses))])
         return winners
 
     def mapValue(self, value, range):
@@ -66,7 +65,7 @@ class GenericAlgorithmHelper(object):
         for i in range(0, len(population), 2):
             mom, dad = population[i: i + 2]
             bounds = self.getTwoBounds(mom.SEGMENT_LENGTH)
-            offsprings += dad.doublePointCrossover(mom, bounds, pc)
+            offsprings += dad.crossover(mom, bounds, pc)
         return offsprings
 
     def replace(self, parents, offspring, replacementFraction):

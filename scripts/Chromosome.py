@@ -6,11 +6,19 @@ class Chromosome(object):
     fitness = None
 
     @abc.abstractclassmethod
-    def fitness(self):
+    def getFitness(self):
         pass
 
     @abc.abstractclassmethod
     def updateFitness(self):
+        pass
+
+    @abc.abstractclassmethod
+    def mutate(self, pm):
+        pass
+
+    @abc.abstractclassmethod
+    def crossover(self, other, bounds, pc):
         pass
 
     def __str__(self):

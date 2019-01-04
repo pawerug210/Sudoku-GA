@@ -9,7 +9,7 @@ def solveSudoku(filename):
     helper = GeneticAlgorithmHelper.GenericAlgorithmHelper()
     params = getParams('params.json')
     data = readFile(filename).flatten().tolist()
-    SudokuGA.SudokuGA.sudokuFixedDigitsArray = [x > 0 for x in data]
+    SudokuGA.SudokuGA.FIXED_DIGITS_MAP = [x > 0 for x in data]
     solved = False
     generation = 0
     while not solved:

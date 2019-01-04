@@ -3,6 +3,6 @@
 	"populationSize" : "100",
 	"tournamentSize" : "4",
 	"pm" : "0.0",
-	"pc" : "0.0",
+	"pc" : "0.1",
 	"rf" : "0.9"
 }

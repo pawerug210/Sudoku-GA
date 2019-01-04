@@ -6,44 +6,33 @@ class Sudoku(object):
     NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     SEGMENT_LENGTH = 9
     SQUARE_SEGMENT_SIZE = 3
-    sudokuFixedDigitsArray = []
+    FIXED_DIGITS_MAP = []
 
     def __init__(self, sudokuValuesList):
-        self.sudokuDigitsArray = self.initialize(sudokuValuesList)
+        self.DigitsArray = self.initialize(sudokuValuesList)
 
     def initialize(self, digitsList):
         filledDigitsList = []
-        # use NUMBERS
         valuesList = list(self.NUMBERS)
         for i in range(0, 9):
             shuffle(valuesList)
             filledDigitsList += self.fillZeros(self.getRow(values=digitsList, rowNumber=i), valuesList)
         return filledDigitsList
 
-    def isValid(self):
-        # todo
-        error = 0
-        for i in range(0, 9):
-            error += self.listError(self.getRow(self.sudokuDigitsArray, i)) + \
-                     self.listError(self.getColumn(i)) + \
-                     self.listError(self.getSquare(i))
-
-        return error == 0
-
     def getDigitsRow(self, rowNumber):
         startPosition = rowNumber * self.SEGMENT_LENGTH
-        return self.sudokuDigitsArray[startPosition: startPosition + self.SEGMENT_LENGTH], \
-               self.sudokuFixedDigitsArray[startPosition: startPosition + self.SEGMENT_LENGTH]
+        return self.DigitsArray[startPosition: startPosition + self.SEGMENT_LENGTH], \
+               self.FIXED_DIGITS_MAP[startPosition: startPosition + self.SEGMENT_LENGTH]
 
     def setValue(self, row, column, value):
         index = self.getIndex(row, column)
-        if (value not in self.NUMBERS) or self.sudokuFixedDigitsArray[index]:
+        if (value not in self.NUMBERS) or self.FIXED_DIGITS_MAP[index]:
             raise Exception
-        self.sudokuDigitsArray[index] = value
+        self.DigitsArray[index] = value
 
     def getValue(self, row, column):
         try:
-            return self.sudokuDigitsArray[self.getIndex(row, column)]
+            return self.DigitsArray[self.getIndex(row, column)]
         except IndexError:
             return 0
 
@@ -81,7 +70,7 @@ class Sudoku(object):
 
     def getRowWithFixedValues(self, values, rowNumber):
         rowWithFixedValues = map(lambda value, isFixed: value if isFixed else 0, values,
-                                 self.getRow(self.sudokuFixedDigitsArray, rowNumber))
+                                 self.getRow(self.FIXED_DIGITS_MAP, rowNumber))
         return list(rowWithFixedValues)
 
     def zeros(self, n):
@@ -98,4 +87,4 @@ class Sudoku(object):
         return child
 
     def draw(self):
-        print(np.asarray(self.sudokuDigitsArray).reshape((9, 9)))
+        print(np.asarray(self.DigitsArray).reshape((9, 9)))
