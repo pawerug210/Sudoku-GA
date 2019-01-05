@@ -43,7 +43,7 @@ class GenericAlgorithmHelper(object):
     def replace(self, parents, offspring, replacementFraction):
         parents.sort(key=lambda x: x.fitness)
         quantityToReplace = math.floor(len(parents) * replacementFraction)
-        return parents[0: len(parents) - quantityToReplace] + offspring[0: quantityToReplace]
+        return sorted(parents[0: len(parents) - quantityToReplace] + offspring[0: quantityToReplace], key=lambda x: x.fitness)
 
     def shouldRestart(self, currentBest, iteration, restart):
         if currentBest < self.CurrentBest:

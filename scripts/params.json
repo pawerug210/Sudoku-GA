@@ -2,7 +2,7 @@
 	"restartCriteria" : "500",
 	"populationSize" : "100",
 	"tournamentSize" : "4",
-	"pm" : "0.0",
+	"pm" : "0.01",
 	"pc" : "0.1",
 	"rf" : "0.9",
 	"adaptiveMutation" : "0.2"

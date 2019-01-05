@@ -2,7 +2,6 @@ import Sudoku
 import Chromosome
 import random
 import math
-from collections import namedtuple
 
 
 class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
@@ -20,16 +19,10 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
     def updateFitness(self):
         error = 0
         for i in range(0, 9):
-            # todo remove row from validation
-            row = self.getRow(i)
             column = self.getColumn(i)
             square = self.getSquare(i)
-            rowError = self.getError(row)
             columnError = self.getError(column)
             squareError = self.getError(square)
-            # todo remove
-            if rowError != 0:
-                raise Exception
             error += columnError + squareError
         self.fitness = error
 
@@ -52,15 +45,14 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
             for j in range(0, len(notFixedIndexes)):
                 if pm + adaptiveMutationRow[notFixedIndexes[j]] > random.random():
                     index = self.mapValue(random.random(), (0, len(notFixedIndexes) - 1))
-                    # different value than j
-                    valueFromIndexDifferentThanJ = (notFixedIndexes[:j] + notFixedIndexes[j + 1:])[index]
-                    if notFixedIndexes[j] != valueFromIndexDifferentThanJ:
-                        swapIndexes = [notFixedIndexes[j], valueFromIndexDifferentThanJ]
-                        # swapIndexes = random.sample(notFixedIndexes, 2)
-                        valuesRow[swapIndexes[1]], valuesRow[swapIndexes[0]] = valuesRow[swapIndexes[0]], valuesRow[
-                            swapIndexes[1]]
-                        self.setValue(rowNumber, swapIndexes[0], valuesRow[swapIndexes[0]])
-                        self.setValue(rowNumber, swapIndexes[1], valuesRow[swapIndexes[1]])
+                    # different index value than j
+                    differentIndexValueThanJ = (notFixedIndexes[:j] + notFixedIndexes[j + 1:])[index]
+                    swapIndexes = [notFixedIndexes[j], differentIndexValueThanJ]
+                    # swapIndexes = random.sample(notFixedIndexes, 2)
+                    valuesRow[swapIndexes[1]], valuesRow[swapIndexes[0]] = valuesRow[swapIndexes[0]], valuesRow[
+                        swapIndexes[1]]
+                    self.setValue(rowNumber, swapIndexes[0], valuesRow[swapIndexes[0]])
+                    self.setValue(rowNumber, swapIndexes[1], valuesRow[swapIndexes[1]])
 
     # mapping random value from 0 to 1 into given range
     def mapValue(self, value, range):
@@ -75,14 +67,13 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
             column = self.getColumn(i)
             square = self.getSquare(i)
             if self.getError(column) != 0:
-                # todo rename duplicationindexes
-                duplicationIndexes = self.getDuplicationIndexesInfo(column, self.getColumn(i, self.FIXED_DIGITS_MAP))
-                for item in duplicationIndexes:
+                duplicationIndexesInfo = self.getDuplicationIndexesInfo(column, self.getColumn(i, self.FIXED_DIGITS_MAP))
+                for item in duplicationIndexesInfo:
                     globalIndex = item[0] * self.SEGMENT_LENGTH + i
                     self.AdaptiveMutationMap[globalIndex] += 1.0 if item[1] else self.ADAPTIVE_MUTATION_VALUE
             if self.getError(square) != 0:
-                duplicationIndexes = self.getDuplicationIndexesInfo(square, self.getSquare(i, self.FIXED_DIGITS_MAP))
-                for item in duplicationIndexes:
+                duplicationIndexesInfo = self.getDuplicationIndexesInfo(square, self.getSquare(i, self.FIXED_DIGITS_MAP))
+                for item in duplicationIndexesInfo:
                     globalIndex = self.getAbsoluteIndex(i, item[0])
                     self.AdaptiveMutationMap[globalIndex] += 1.0 if item[1] else self.ADAPTIVE_MUTATION_VALUE
 
@@ -125,7 +116,6 @@ class SudokuGA(Sudoku.Sudoku, Chromosome.Chromosome):
         secondChild = self.fillZeros(secondChild, momRow)
         return firstChild, secondChild
 
-    # todo rename it
     def getDuplicationIndexesInfo(self, valuesList, fixedValuesMask):
         fixedValues = [val for idx, val in enumerate(valuesList) if fixedValuesMask[idx]]
         duplicates = [val for val in valuesList if valuesList.count(val) > 1]

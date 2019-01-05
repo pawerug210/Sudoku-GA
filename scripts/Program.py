@@ -32,7 +32,7 @@ def solveSudoku(filename):
 
 
 def main():
-    solveSudoku('test_3')
+    solveSudoku('inputs/easy_4')
 
 
 if __name__ == "__main__":
